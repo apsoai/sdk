@@ -1,0 +1,32 @@
+{
+  "name": "@apsoai/sdk",
+  "version": "1.0.0",
+  "description": "SDK for Apso services, offering easy access to OpenAPI-compliant CRUD operations.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^10.0.0",
+    "axios": "^1.7.8",
+    "openapi-types": "^9.0.0",
+    "swagger-to-ts": "^1.4.6"
+  },
+  "devDependencies": {
+    "@types/axios-mock-adapter": "^1.9.0",
+    "@types/jest": "^29.5.14",
+    "axios-mock-adapter": "^2.1.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^4.9.5"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testEnvironment": "node"
+  },
+  "license": "MIT"
+}
