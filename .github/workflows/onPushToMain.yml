@@ -17,7 +17,7 @@ jobs:
       with:
         node-version: '18'  # Set to your Node.js version
         registry-url: 'https://npm.pkg.github.com'
-        scope: '@apsoai'
+        scope: '@apso'
       
     - name: Install dependencies
       run: npm install
