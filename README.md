@@ -19,13 +19,10 @@ const config = {
 
 const client = ApsoClientFactory.getClient(config);
 
-// Using QueryBuilder to build a request
-const query = new QueryBuilder()
-  .select(['name', 'age'])
+const activeUsers = await client.entity('users')
   .where({ status: 'active' })
-  .limit(10);
+  .limit(10)
+  .get();
 
-client.get('/users', query)
-  .then(data => console.log(data))
-  .catch(err => console.error(err));
+
 ```

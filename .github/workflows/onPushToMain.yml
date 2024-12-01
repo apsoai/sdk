@@ -1,0 +1,37 @@
+name: version, tag and publish package
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Ensures history is checked out for versioning
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'  # Set to your Node.js version
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@apsoai'
+      
+    - name: Install dependencies
+      run: npm install
+
+    - name: Bump version and tag
+      id: bump_version
+      uses: phips28/gh-action-bump-version@master
+      with:
+        tag-prefix: 'v'  # Set this to 'v' if you want your tags like 'v1.0.0'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - run: npm ci
+    - run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
