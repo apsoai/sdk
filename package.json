@@ -1,6 +1,6 @@
 {
   "name": "@apso/sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SDK for Apso services, offering easy access to OpenAPI-compliant CRUD operations.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
