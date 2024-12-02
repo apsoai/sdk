@@ -1,0 +1,46 @@
+---
+title: Introduction
+description: Apso SDK Documentation
+---
+
+
+The Apso SDK allows developers to easily interact with Apso services that expose OpenAPI 3.0 compliant CRUD APIs. The SDK is flexible and supports different HTTP clients (`axios` or `fetch`), with a simple configuration-based setup. This documentation provides an overview of the available methods, setup instructions, and examples to help you get started.
+
+## Installation
+To use the Apso SDK, you need to install it via npm or yarn.
+
+```sh
+npm install @apsoai/sdk
+```
+
+or
+
+```sh
+yarn add @apsoai/sdk
+```
+
+## Getting Started
+### Importing the SDK
+First, import the `ApsoClient` from the SDK:
+
+```typescript
+import { ApsoClient, ApsoClientConfig } from '@apsoai/sdk';
+```
+
+### Configuration
+To instantiate an `ApsoClient`, provide a configuration object with the required parameters:
+
+- **`baseURL`** (string): The base URL of your API.
+- **`apiKey`** (string): API key for authentication.
+- **`client`** (optional, `'axios' | 'fetch'`): Choose the HTTP client to use (defaults to `'fetch'`).
+- **`otherOptions`** (optional, `Record<string, any>`): Additional options for the HTTP client.
+
+```typescript
+const config: ApsoClientConfig = {
+  baseURL: 'https://api.example.com',
+  apiKey: 'your-api-key',
+  client: 'axios', // Optional: use 'fetch' or 'axios'
+};
+
+const apsoClient = new ApsoClient(config);
+```

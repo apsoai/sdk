@@ -1,0 +1,102 @@
+---
+title: Usage
+description: Methods and usage for an Apso Client
+---
+
+The `ApsoClient` provides an `entity()` method to interact with specific resources in the API. It allows you to chain different methods to build queries and perform CRUD operations.
+
+### `entity(entityName: string): EntityClient`
+Creates an instance of `EntityClient` for the specified entity.
+
+- **`entityName`**: The name of the entity (e.g., `'users'`).
+
+#### Example
+```typescript
+const usersClient = apsoClient.entity('users');
+```
+
+### `where(filter: Record<string, any>): EntityClient`
+Adds a filter to the query.
+
+- **`filter`**: The filter conditions (e.g., `{ status: 'active' }`).
+
+#### Example
+```typescript
+const activeUsers = await apsoClient.entity('users').where({ status: 'active' }).get();
+```
+
+### `limit(limit: number): EntityClient`
+Limits the number of returned records.
+
+- **`limit`**: The maximum number of records to return.
+
+#### Example
+```typescript
+const limitedUsers = await apsoClient.entity('users').where({ status: 'active' }).limit(10).get();
+```
+
+### `get<T>(): Promise<T>`
+Performs a GET request to retrieve the records.
+
+#### Example
+```typescript
+const users = await apsoClient.entity('users').where({ status: 'active' }).limit(10).get();
+```
+
+### `post<T>(data: any): Promise<T>`
+Performs a POST request to create a new resource.
+
+- **`data`**: The data to be sent in the request body.
+
+#### Example
+```typescript
+const newUser = await apsoClient.entity('users').post({ name: 'John Doe', email: 'john@example.com' });
+```
+
+### `put<T>(data: any): Promise<T>`
+Performs a PUT request to update an existing resource.
+
+- **`data`**: The data to be updated.
+
+#### Example
+```typescript
+const updatedUser = await apsoClient.entity('users').where({ id: 1 }).put({ email: 'john.doe@example.com' });
+```
+
+### `delete<T>(): Promise<T>`
+Performs a DELETE request to remove a resource.
+
+#### Example
+```typescript
+await apsoClient.entity('users').where({ id: 1 }).delete();
+```
+
+## Query Parameters
+The SDK supports several query parameters for GET requests to filter, sort, or paginate data.
+
+### Available Query Methods
+- **`where(filter: Record<string, any>)`**: Filter records (e.g., `{ active: true }`).
+- **`limit(limit: number)`**: Limit the number of returned records.
+- **`offset(offset: number)`**: Skip a number of records.
+- **`page(page: number)`**: Specify the page number for pagination.
+
+#### Example
+```typescript
+const result = await apsoClient.entity('users')
+  .where({ active: true })
+  .limit(5)
+  .get();
+```
+
+## Error Handling
+The `ApsoClient` will throw an error if the request fails. Make sure to wrap your requests in try-catch blocks to handle errors appropriately.
+
+```typescript
+try {
+  const user = await apsoClient.entity('users').where({ id: 1 }).get();
+  console.log(user);
+} catch (error) {
+  console.error('Error fetching user:', error);
+}
+```
+
