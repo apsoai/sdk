@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.0.0",
-    "axios": "^1.7.8",
+    "axios": "^1.8.1",
     "openapi-types": "^9.0.0",
     "swagger-to-ts": "^1.4.6"
   },
