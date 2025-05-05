@@ -152,7 +152,7 @@ class ApsoClient {
       this.axiosInstance = axios.create({
         baseURL: this.baseURL,
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
+          'x-api-key': `${this.apiKey}`,
         },
       });
     }
@@ -161,8 +161,7 @@ class ApsoClient {
 
   private getHeaders(): Record<string, string> {
     return {
-    //   'Authorization': `Bearer ${this.apiKey}`,
-      'authorization': `${this.apiKey}`,
+      'x-api-key': `${this.apiKey}`,
       'Content-Type': 'application/json',
     };
   }
