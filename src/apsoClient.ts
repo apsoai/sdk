@@ -140,11 +140,13 @@ class ApsoClient {
   private client: 'axios' | 'fetch';
   private axiosInstance?: AxiosInstance;
   private cache: Map<string, CacheEntry<any>> = new Map();
+  private debug: boolean;
 
   constructor(config: ApsoClientConfig) {
     this.baseURL = config.baseURL;
     this.apiKey = config.apiKey;
     this.client = config.client || 'fetch';
+    this.debug = !!config.debug;
   }
 
   private async getAxiosInstance(): Promise<AxiosInstance> {
@@ -169,6 +171,9 @@ class ApsoClient {
   private async request<T>(method: string, url: string, data?: any, params?: Record<string, any>): Promise<T> {
     if (this.client === 'fetch') {
       const queryString = params ? '?' + new URLSearchParams(params as any).toString() : '';
+      if (this.debug) {
+        console.log(`[ApsoClient][DEBUG] ${method.toUpperCase()} ${this.baseURL}${url}${queryString}`);
+      }
       const response = await fetch(`${this.baseURL}${url}${queryString}`, {
         method,
         headers: this.getHeaders(),
@@ -183,6 +188,10 @@ class ApsoClient {
     } else if (this.client === 'axios') {
       const axiosClient = await this.getAxiosInstance();
       const config = { params, headers: this.getHeaders() };
+      if (this.debug) {
+        const paramString = params ? '?' + new URLSearchParams(params as any).toString() : '';
+        console.log(`[ApsoClient][DEBUG] ${method.toUpperCase()} ${this.baseURL}${url}${paramString}`);
+      }
       if (method === 'get') {
         const response = await axiosClient.get<T>(url, config);
         return response.data;

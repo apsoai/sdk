@@ -3,6 +3,7 @@ export interface ApsoClientConfig {
   apiKey: string;
   client?: 'axios' | 'fetch';
   otherOptions?: Record<string, any>;
+  debug?: boolean;
   }
   
 export interface QueryParams {
