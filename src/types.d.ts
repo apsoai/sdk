@@ -15,6 +15,7 @@ export interface QueryParams {
     limit?: number;
     offset?: number;
     page?: number;
+    cache?: boolean;
   }
   
  export interface CacheEntry<T> {

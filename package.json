@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@apidevtools/swagger-parser": "^10.0.0",
+    "@dataui/crud-request": "^5.0.0",
     "axios": "^1.7.8",
     "openapi-types": "^9.0.0",
     "swagger-to-ts": "^1.4.6"

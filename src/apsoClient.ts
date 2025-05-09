@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { QueryParams, EntityQueryBuilder, CacheEntry, ApsoClientConfig } from './types';
+import { RequestQueryBuilder, CondOperator } from '@dataui/crud-request';
+
 class QueryBuilder implements EntityQueryBuilder {
   private params: QueryParams = {};
   private useCache: boolean = false;
@@ -246,15 +248,65 @@ class ApsoClient {
   private buildQueryParams(params?: QueryParams): string {
     if (!params) return '';
 
-    const query = Object.entries(params).map(([key, value]) => {
-      if (Array.isArray(value)) {
-        return `${key}=${value.join(',')}`;
-      } else if (typeof value === 'object' && value !== null) {
-        return Object.entries(value).map(([innerKey, innerValue]) => `${key}[${innerKey}]=${innerValue}`).join('&');
-      }
-      return `${key}=${value}`;
-    }).join('&');
+    const qb = RequestQueryBuilder.create();
 
+    // Select/fields
+    if (params.fields) {
+      qb.select(params.fields);
+    }
+
+    // Filter
+    if (params.filter) {
+      Object.entries(params.filter).forEach(([field, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          // Support operators: { field: { $eq: value } }
+          Object.entries(value).forEach(([op, v]) => {
+            qb.setFilter({ field, operator: op as CondOperator, value: v });
+          });
+        } else {
+          qb.setFilter({ field, operator: '$eq', value });
+        }
+      });
+    }
+
+    // OR
+    if (params.or) {
+      Object.entries(params.or).forEach(([field, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          Object.entries(value).forEach(([op, v]) => {
+            qb.setOr({ field, operator: op as CondOperator, value: v });
+          });
+        } else {
+          qb.setOr({ field, operator: '$eq', value });
+        }
+      });
+    }
+
+    // Join
+    if (params.join) {
+      params.join.forEach((joinField) => {
+        qb.setJoin({ field: joinField });
+      });
+    }
+
+    // Sort
+    if (params.sort) {
+      Object.entries(params.sort).forEach(([field, order]) => {
+        qb.sortBy({ field, order: order as 'ASC' | 'DESC' });
+      });
+    }
+
+    // Limit, Offset, Page
+    if (params.limit !== undefined) qb.setLimit(params.limit);
+    if (params.offset !== undefined) qb.setOffset(params.offset);
+    if (params.page !== undefined) qb.setPage(params.page);
+
+    // Cache (resetCache)
+    if (params.cache !== undefined) {
+      if (params.cache) qb.resetCache();
+    }
+
+    const query = qb.query();
     return query ? `?${query}` : '';
   }
 }
