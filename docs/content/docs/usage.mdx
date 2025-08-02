@@ -25,6 +25,63 @@ Adds a filter to the query.
 const activeUsers = await apsoClient.entity('users').where({ status: 'active' }).get();
 ```
 
+### `join(joinTables: string[]): EntityClient`
+Adds joins to include related entities in the query response. This allows you to fetch associated data in a single request.
+
+- **`joinTables`**: An array of related entity names to join (e.g., `['profile', 'orders']`).
+
+#### Basic Join Example
+```typescript
+// Fetch users with their profile information
+const usersWithProfiles = await apsoClient.entity('users')
+  .join(['profile'])
+  .get();
+```
+
+#### Multiple Joins Example
+```typescript
+// Fetch users with profiles, orders, and addresses
+const usersWithRelatedData = await apsoClient.entity('users')
+  .join(['profile', 'orders', 'addresses'])
+  .where({ status: 'active' })
+  .get();
+```
+
+#### Complex Join with Filtering
+```typescript
+// Fetch orders with customer and product information, filtering by date
+const recentOrdersWithDetails = await apsoClient.entity('orders')
+  .join(['customer', 'products', 'shipping_address'])
+  .where({ created_at: { gte: '2024-01-01' } })
+  .orderBy({ created_at: 'DESC' })
+  .limit(50)
+  .get();
+```
+
+#### Nested Entity Joins
+```typescript
+// Fetch companies with their departments and employees
+const companiesWithStructure = await apsoClient.entity('companies')
+  .join(['departments', 'departments.employees'])
+  .where({ active: true })
+  .get();
+```
+
+### `select(fields: string[]): EntityClient`
+Specifies which fields to return in the response. This is especially useful with joins to control the amount of data returned.
+
+- **`fields`**: An array of field names to include in the response.
+
+#### Example with Joins
+```typescript
+// Fetch users with specific fields from joined entities
+const selectedUserData = await apsoClient.entity('users')
+  .select(['id', 'name', 'email', 'profile.avatar', 'profile.bio', 'orders.id', 'orders.total'])
+  .join(['profile', 'orders'])
+  .where({ status: 'active' })
+  .get();
+```
+
 ### `limit(limit: number): EntityClient`
 Limits the number of returned records.
 
@@ -71,20 +128,109 @@ Performs a DELETE request to remove a resource.
 await apsoClient.entity('users').where({ id: 1 }).delete();
 ```
 
+## Real-World Join Examples
+
+### E-commerce Scenarios
+
+#### Product Catalog with Categories and Reviews
+```typescript
+// Fetch products with their categories, reviews, and inventory data
+const productCatalog = await apsoClient.entity('products')
+  .join(['category', 'reviews', 'inventory'])
+  .select([
+    'id', 'name', 'price', 'description',
+    'category.name', 'category.slug',
+    'reviews.rating', 'reviews.comment', 'reviews.user_name',
+    'inventory.quantity', 'inventory.warehouse_location'
+  ])
+  .where({ status: 'active', 'inventory.quantity': { gt: 0 } })
+  .orderBy({ created_at: 'DESC' })
+  .limit(20)
+  .get();
+```
+
+#### Order Management with Full Details
+```typescript
+// Fetch orders with customer, items, and shipping information
+const orderDetails = await apsoClient.entity('orders')
+  .join(['customer', 'order_items', 'order_items.product', 'shipping_address', 'payment_method'])
+  .select([
+    'id', 'order_number', 'status', 'total', 'created_at',
+    'customer.name', 'customer.email', 'customer.phone',
+    'order_items.quantity', 'order_items.price',
+    'order_items.product.name', 'order_items.product.sku',
+    'shipping_address.street', 'shipping_address.city', 'shipping_address.postal_code',
+    'payment_method.type', 'payment_method.last_four'
+  ])
+  .where({ status: { in: ['pending', 'processing'] } })
+  .orderBy({ created_at: 'DESC' })
+  .get();
+```
+
+### Content Management Scenarios
+
+#### Blog Posts with Authors and Comments
+```typescript
+// Fetch blog posts with author details and recent comments
+const blogPostsWithDetails = await apsoClient.entity('posts')
+  .join(['author', 'comments', 'comments.user', 'tags'])
+  .select([
+    'id', 'title', 'slug', 'content', 'published_at',
+    'author.name', 'author.bio', 'author.avatar',
+    'comments.content', 'comments.created_at',
+    'comments.user.name', 'comments.user.avatar',
+    'tags.name', 'tags.slug'
+  ])
+  .where({ published: true })
+  .orderBy({ published_at: 'DESC' })
+  .limit(10)
+  .get();
+```
+
+### User Management Scenarios
+
+#### User Profiles with Permissions and Activity
+```typescript
+// Fetch users with their roles, permissions, and recent activity
+const userManagement = await apsoClient.entity('users')
+  .join(['profile', 'roles', 'roles.permissions', 'activity_logs'])
+  .select([
+    'id', 'username', 'email', 'status', 'last_login',
+    'profile.first_name', 'profile.last_name', 'profile.department',
+    'roles.name', 'roles.description',
+    'roles.permissions.resource', 'roles.permissions.action',
+    'activity_logs.action', 'activity_logs.timestamp'
+  ])
+  .where({ status: 'active' })
+  .orderBy({ last_login: 'DESC' })
+  .get();
+```
+
 ## Query Parameters
 The SDK supports several query parameters for GET requests to filter, sort, or paginate data.
 
 ### Available Query Methods
 - **`where(filter: Record<string, any>)`**: Filter records (e.g., `{ active: true }`).
+- **`join(joinTables: string[])`**: Include related entities in the response.
+- **`select(fields: string[])`**: Specify which fields to return.
 - **`limit(limit: number)`**: Limit the number of returned records.
 - **`offset(offset: number)`**: Skip a number of records.
 - **`page(page: number)`**: Specify the page number for pagination.
+- **`orderBy(sort: Record<string, 'ASC' | 'DESC'>)`**: Sort the results.
+- **`or(orCondition: Record<string, any>)`**: Add OR conditions to the query.
+- **`cache(useCache?: boolean, duration?: number)`**: Enable caching for the request.
 
-#### Example
+#### Advanced Query Example
 ```typescript
 const result = await apsoClient.entity('users')
-  .where({ active: true })
-  .limit(5)
+  .select(['id', 'name', 'email', 'profile.avatar', 'orders.total'])
+  .join(['profile', 'orders'])
+  .where({ active: true, 'profile.verified': true })
+  .or({ role: 'admin' })
+  .orderBy({ created_at: 'DESC' })
+  .limit(25)
+  .offset(50)
+  .cache(true, 300) // Cache for 5 minutes
   .get();
 ```
 
@@ -93,10 +239,13 @@ The `ApsoClient` will throw an error if the request fails. Make sure to wrap you
 
 ```typescript
 try {
-  const user = await apsoClient.entity('users').where({ id: 1 }).get();
-  console.log(user);
+  const userWithOrders = await apsoClient.entity('users')
+    .join(['orders', 'profile'])
+    .where({ id: 1 })
+    .get();
+  console.log(userWithOrders);
 } catch (error) {
-  console.error('Error fetching user:', error);
+  console.error('Error fetching user with related data:', error);
 }
 ```
 
