@@ -1,1 +1,2 @@
-export { ApsoClient, ApsoClientFactory, QueryBuilder, QueryParams } from './apsoClient';
+// Re-export everything from apsoClient
+export * from './apsoClient';
