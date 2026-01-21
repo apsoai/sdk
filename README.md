@@ -5,12 +5,12 @@ A TypeScript SDK for interacting with Apso services via their OpenAPI-compliant 
 ## Installation
 
 ```bash
-npm install @apsoai/sdk
+npm install @apso/sdk
 ```
 
 ## Usage
 ```typescript
-import { ApsoClientFactory, QueryBuilder } from '@apsoai/sdk';
+import { ApsoClientFactory, QueryBuilder } from '@apso/sdk';
 
 const config = {
   baseURL: 'https://api.apso-service.com',
@@ -54,7 +54,7 @@ const response = await client.get('/WorkspaceServices', {
 Here are some Jest test examples for the SDK:
 
 ```typescript
-import { ApsoClientFactory } from '@apsoai/sdk';
+import { ApsoClientFactory } from '@apso/sdk';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
