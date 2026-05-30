@@ -4,6 +4,30 @@
   "description": "SDK for Apso services, offering easy access to OpenAPI-compliant CRUD operations.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "author": "Apso by Mavric <hello@apso.dev>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apsoai/sdk.git"
+  },
+  "homepage": "https://github.com/apsoai/sdk",
+  "bugs": {
+    "url": "https://github.com/apsoai/sdk/issues"
+  },
+  "keywords": [
+    "apso",
+    "sdk",
+    "api-client",
+    "crud",
+    "rest-client",
+    "typescript",
+    "nestjs-crud",
+    "query-builder",
+    "openapi"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "test": "jest"
@@ -29,6 +53,5 @@
       "^.+\\.tsx?$": "ts-jest"
     },
     "testEnvironment": "node"
-  },
-  "license": "MIT"
+  }
 }
