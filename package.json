@@ -33,7 +33,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@apidevtools/swagger-parser": "^10.0.0",
+    "@apidevtools/swagger-parser": "^10.1.1",
     "@dataui/crud-request": "^5.0.0",
     "axios": "^1.7.8",
     "openapi-types": "^9.0.0",
