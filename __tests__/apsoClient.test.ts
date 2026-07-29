@@ -25,17 +25,23 @@ describe('Apso SDK Client', () => {
   });
 
   test('GET request with where and limit', async () => {
-    mock.onGet('/HopperLoads?filter[status]=active&limit=10').reply(200, { data: 'mockData' });
+    mock.onGet(/^\/HopperLoads/).reply(200, { data: 'mockData' });
 
     const data = await client.entity('HopperLoads').where({ status: 'active' }).limit(10).get();
     expect(data).toEqual({ data: 'mockData' });
+    expect(decodeURIComponent(mock.history.get[0].url!)).toBe(
+      '/HopperLoads?filter[0]=status||$eq||active&limit=10'
+    );
   });
 
   test('GET request with join and orderBy', async () => {
-    mock.onGet('/HopperLoads?join=relatedEntity&sort[created_at]=ASC').reply(200, { data: 'mockData' });
+    mock.onGet(/^\/HopperLoads/).reply(200, { data: 'mockData' });
 
     const data = await client.entity('HopperLoads').join(['relatedEntity']).orderBy({ created_at: 'ASC' }).get();
     expect(data).toEqual({ data: 'mockData' });
+    expect(decodeURIComponent(mock.history.get[0].url!)).toBe(
+      '/HopperLoads?join[0]=relatedEntity&sort[0]=created_at,ASC'
+    );
   });
 
   test('POST request with data', async () => {

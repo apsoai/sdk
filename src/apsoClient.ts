@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { EntityClient, QueryBuilder } from './EntityClient';
+import { RequestQueryBuilder, CondOperator } from '@dataui/crud-request';
 
 // ============================================================================
 // Types
@@ -19,6 +20,7 @@ export interface ApsoClientConfig {
   retry?: RetryConfig | boolean;
   headers?: Record<string, string>;
   otherOptions?: Record<string, any>;
+  debug?: boolean;
 }
 
 export interface QueryParams {
@@ -30,6 +32,7 @@ export interface QueryParams {
   limit?: number;
   offset?: number;
   page?: number;
+  cache?: boolean;
 }
 
 export interface CacheEntry<T> {
@@ -61,6 +64,7 @@ class ApsoClient {
   private customHeaders: Record<string, string>;
   private axiosInstance?: AxiosInstance;
   private cache: Map<string, CacheEntry<any>> = new Map();
+  private debug: boolean;
 
   constructor(config: ApsoClientConfig) {
     this.baseURL = config.baseURL;
@@ -68,6 +72,7 @@ class ApsoClient {
     this.httpClient = config.client || 'fetch';
     this.timeout = config.timeout || DEFAULT_TIMEOUT;
     this.customHeaders = config.headers || {};
+    this.debug = !!config.debug;
 
     // Configure retry
     if (config.retry === true) {
@@ -125,6 +130,10 @@ class ApsoClient {
         if (this.httpClient === 'fetch') {
           const queryString = params ? '?' + new URLSearchParams(params as any).toString() : '';
 
+          if (this.debug) {
+            console.log(`[ApsoClient][DEBUG] ${method.toUpperCase()} ${this.baseURL}${url}${queryString}`);
+          }
+
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
@@ -153,6 +162,11 @@ class ApsoClient {
         } else if (this.httpClient === 'axios') {
           const axiosClient = await this.getAxiosInstance();
           const config = { params, headers: this.getHeaders() };
+
+          if (this.debug) {
+            const paramString = params ? '?' + new URLSearchParams(params as any).toString() : '';
+            console.log(`[ApsoClient][DEBUG] ${method.toUpperCase()} ${this.baseURL}${url}${paramString}`);
+          }
 
           let response;
           if (method === 'get') {
@@ -271,7 +285,65 @@ class ApsoClient {
         return `${key}=${value}`;
       })
       .join('&');
+    const qb = RequestQueryBuilder.create();
 
+    // Select/fields
+    if (params.fields) {
+      qb.select(params.fields);
+    }
+
+    // Filter
+    if (params.filter) {
+      Object.entries(params.filter).forEach(([field, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          // Support operators: { field: { $eq: value } }
+          Object.entries(value).forEach(([op, v]) => {
+            qb.setFilter({ field, operator: op as CondOperator, value: v });
+          });
+        } else {
+          qb.setFilter({ field, operator: '$eq', value });
+        }
+      });
+    }
+
+    // OR
+    if (params.or) {
+      Object.entries(params.or).forEach(([field, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          Object.entries(value).forEach(([op, v]) => {
+            qb.setOr({ field, operator: op as CondOperator, value: v });
+          });
+        } else {
+          qb.setOr({ field, operator: '$eq', value });
+        }
+      });
+    }
+
+    // Join
+    if (params.join) {
+      params.join.forEach((joinField) => {
+        qb.setJoin({ field: joinField });
+      });
+    }
+
+    // Sort
+    if (params.sort) {
+      Object.entries(params.sort).forEach(([field, order]) => {
+        qb.sortBy({ field, order: order as 'ASC' | 'DESC' });
+      });
+    }
+
+    // Limit, Offset, Page
+    if (params.limit !== undefined) qb.setLimit(params.limit);
+    if (params.offset !== undefined) qb.setOffset(params.offset);
+    if (params.page !== undefined) qb.setPage(params.page);
+
+    // Cache (resetCache)
+    if (params.cache !== undefined) {
+      if (params.cache) qb.resetCache();
+    }
+
+    const query = qb.query();
     return query ? `?${query}` : '';
   }
 }

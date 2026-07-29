@@ -12,6 +12,7 @@ export interface ApsoClientConfig {
   retry?: RetryConfig | boolean;
   headers?: Record<string, string>;
   otherOptions?: Record<string, any>;
+  debug?: boolean;
 }
 
 export interface QueryParams {
@@ -23,6 +24,7 @@ export interface QueryParams {
   limit?: number;
   offset?: number;
   page?: number;
+  cache?: boolean;
 }
 
 export interface CacheEntry<T> {
