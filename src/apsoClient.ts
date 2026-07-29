@@ -272,19 +272,6 @@ class ApsoClient {
   private buildQueryParams(params?: QueryParams): string {
     if (!params) return '';
 
-    const query = Object.entries(params)
-      .filter(([, value]) => value !== undefined && value !== null)
-      .map(([key, value]) => {
-        if (Array.isArray(value)) {
-          return `${key}=${value.join(',')}`;
-        } else if (typeof value === 'object' && value !== null) {
-          return Object.entries(value)
-            .map(([innerKey, innerValue]) => `${key}[${innerKey}]=${innerValue}`)
-            .join('&');
-        }
-        return `${key}=${value}`;
-      })
-      .join('&');
     const qb = RequestQueryBuilder.create();
 
     // Select/fields

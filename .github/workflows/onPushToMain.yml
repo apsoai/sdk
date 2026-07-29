@@ -80,7 +80,6 @@ jobs:
     - name: Setup NPM Authentication
       run: |
         echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-        cat ~/.npmrc
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
     
