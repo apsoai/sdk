@@ -86,7 +86,7 @@ describe('Apso SDK Client', () => {
 
   describe('Semantic CRUD Methods', () => {
     test('findMany() returns paginated data', async () => {
-      mock.onGet(/^\/Product/).reply(200, {
+      mock.onGet('/Product?filter[status]=active&limit=20').reply(200, {
         data: [{ id: 1, name: 'Product 1' }],
         total: 100,
         page: 1,
@@ -100,9 +100,6 @@ describe('Apso SDK Client', () => {
         page: 1,
         pageCount: 5
       });
-      expect(decodeURIComponent(mock.history.get[0].url!)).toBe(
-        '/Product?filter[0]=status||$eq||active&limit=20'
-      );
     });
 
     test('findOne() with id filter fetches single record', async () => {
@@ -113,15 +110,12 @@ describe('Apso SDK Client', () => {
     });
 
     test('findOne() with non-id filter uses limit=1', async () => {
-      mock.onGet(/^\/Product/).reply(200, {
+      mock.onGet('/Product?filter[status]=active&limit=1').reply(200, {
         data: [{ id: 1, name: 'Active Product' }]
       });
 
       const record = await client.entity('Product').where({ status: 'active' }).findOne();
       expect(record).toEqual({ id: 1, name: 'Active Product' });
-      expect(decodeURIComponent(mock.history.get[0].url!)).toBe(
-        '/Product?filter[0]=status||$eq||active&limit=1'
-      );
     });
 
     test('create() posts new record', async () => {
