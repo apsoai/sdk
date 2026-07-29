@@ -25,17 +25,27 @@ describe('Apso SDK Client', () => {
   });
 
   test('GET request with where and limit', async () => {
-    mock.onGet('/HopperLoads?filter[status]=active&limit=10').reply(200, { data: 'mockData' });
+    // The client builds nestjsx-crud query strings via RequestQueryBuilder
+    // (the format the generated Apso APIs parse); match the route and assert
+    // the real params from the request history (#25 — the old bracket-style
+    // mocks tested a URL format the API never spoke).
+    mock.onGet(new RegExp('/HopperLoads\\?')).reply(200, { data: 'mockData' });
 
     const data = await client.entity('HopperLoads').where({ status: 'active' }).limit(10).get();
     expect(data).toEqual({ data: 'mockData' });
+    const url = decodeURIComponent(mock.history.get[0].url as string);
+    expect(url).toContain('filter[0]=status||$eq||active');
+    expect(url).toContain('limit=10');
   });
 
   test('GET request with join and orderBy', async () => {
-    mock.onGet('/HopperLoads?join=relatedEntity&sort[created_at]=ASC').reply(200, { data: 'mockData' });
+    mock.onGet(new RegExp('/HopperLoads\\?')).reply(200, { data: 'mockData' });
 
     const data = await client.entity('HopperLoads').join(['relatedEntity']).orderBy({ created_at: 'ASC' }).get();
     expect(data).toEqual({ data: 'mockData' });
+    const url = decodeURIComponent(mock.history.get[0].url as string);
+    expect(url).toContain('join[0]=relatedEntity');
+    expect(url).toContain('sort[0]=created_at,ASC');
   });
 
   test('POST request with data', async () => {
@@ -80,7 +90,7 @@ describe('Apso SDK Client', () => {
 
   describe('Semantic CRUD Methods', () => {
     test('findMany() returns paginated data', async () => {
-      mock.onGet('/Product?filter[status]=active&limit=20').reply(200, {
+      mock.onGet(new RegExp('/Product\\?')).reply(200, {
         data: [{ id: 1, name: 'Product 1' }],
         total: 100,
         page: 1,
@@ -94,6 +104,9 @@ describe('Apso SDK Client', () => {
         page: 1,
         pageCount: 5
       });
+      const url = decodeURIComponent(mock.history.get[0].url as string);
+      expect(url).toContain('filter[0]=status||$eq||active');
+      expect(url).toContain('limit=20');
     });
 
     test('findOne() with id filter fetches single record', async () => {
@@ -104,12 +117,15 @@ describe('Apso SDK Client', () => {
     });
 
     test('findOne() with non-id filter uses limit=1', async () => {
-      mock.onGet('/Product?filter[status]=active&limit=1').reply(200, {
+      mock.onGet(new RegExp('/Product\\?')).reply(200, {
         data: [{ id: 1, name: 'Active Product' }]
       });
 
       const record = await client.entity('Product').where({ status: 'active' }).findOne();
       expect(record).toEqual({ id: 1, name: 'Active Product' });
+      const url = decodeURIComponent(mock.history.get[0].url as string);
+      expect(url).toContain('filter[0]=status||$eq||active');
+      expect(url).toContain('limit=1');
     });
 
     test('create() posts new record', async () => {
