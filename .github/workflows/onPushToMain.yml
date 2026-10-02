@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # bump commit, push tags, create GitHub releases
+      id-token: write # npm trusted publishing (OIDC), no NODE_AUTH_TOKEN
     steps:
     - uses: actions/checkout@v3
       with:
@@ -77,16 +78,23 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup NPM Authentication
-      run: |
-        echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-    
+    # Trusted publishing: npm exchanges this workflow's GitHub OIDC token for a
+    # short-lived publish credential. No long-lived npm token to expire.
+    # Configured on npmjs.com: @apso/sdk > Settings > Trusted Publisher
+    # (GitHub Actions, apsoai/sdk, onPushToMain.yml, Allow npm publish).
+    # Build stays on Node 18; publish needs npm >= 11.5.1, which needs Node 22.
+    # No registry-url: setup-node's .npmrc would send its placeholder token.
+    - name: Setup Node.js for publish
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Upgrade npm for trusted publishing
+      run: npm install -g npm@11
+
     - name: Publish to npm
-      run: |
-        npm config set access public
-        npm publish
+      run: npm publish --access public
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+        NODE_AUTH_TOKEN: ''
+        NPM_CONFIG_USERCONFIG: /tmp/empty-npmrc
 
