@@ -1,5 +1,10 @@
 # Apso SDK
 
+> **This repository is archived.** `@apso/sdk` is now developed and published from
+> [apsoai/apso-packages](https://github.com/apsoai/apso-packages/tree/main/typescript/packages/sdk)
+> (`typescript/packages/sdk`), starting with 1.4.0. Open issues and pull requests there.
+> The npm package name and import paths are unchanged.
+
 A TypeScript SDK for interacting with Apso services via their OpenAPI-compliant CRUD API.
 
 ## Installation
