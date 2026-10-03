@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@dataui/crud-request": "^5.0.0",
-    "axios": "^1.18.1"
+    "axios": "^1.20.0"
   },
   "devDependencies": {
     "@types/axios-mock-adapter": "^1.10.4",
